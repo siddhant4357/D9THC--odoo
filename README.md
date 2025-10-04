@@ -318,27 +318,27 @@ Our system uses advanced AI to provide intelligent spending analysis:
 └──────┬──────┘
        │
 ┌──────▼──────────────────────────────────────┐
-│         Admin Creates Users                  │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
-│  │ Managers │  │ Employees│  │  Admins  │  │
-│  └──────────┘  └──────────┘  └──────────┘  │
+│         Admin Creates Users                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐   │ 
+│  │ Managers │  │ Employees│  │  Admins  │   │
+│  └──────────┘  └──────────┘  └──────────┘   │
 └──────┬──────────────────────────────────────┘
        │
 ┌──────▼──────────────────────────────────────┐
-│      Admin Configures Approval Rules         │
-│  • Manager-first routing                     │
-│  • Sequential/Parallel approvers             │
-│  • Required approvers                        │
-│  • Percentage thresholds                     │
+│      Admin Configures Approval Rules        │
+│  • Manager-first routing                    │
+│  • Sequential/Parallel approvers            │
+│  • Required approvers                       │
+│  • Percentage thresholds                    │
 └──────┬──────────────────────────────────────┘
        │
 ┌──────▼──────────────────────────────────────┐
-│      Employee Submits Expense                │
+│      Employee Submits Expense               │
 │  OCR Scan → Auto-fill → Review → Submit     │
 └──────┬──────────────────────────────────────┘
        │
 ┌──────▼──────────────────────────────────────┐
-│      Approval Workflow Engine                │
+│      Approval Workflow Engine               │
 │  ✓ Manager first (if enabled)               │
 │  ✓ Sequential approvers (in order)          │
 │  ✓ Parallel approvers (any order)           │
@@ -347,8 +347,8 @@ Our system uses advanced AI to provide intelligent spending analysis:
 └──────┬──────────────────────────────────────┘
        │
 ┌──────▼──────────────────────────────────────┐
-│          Final Status                        │
-│     ✅ Approved  /  ❌ Rejected              │
+│          Final Status                       │
+│     ✅ Approved  /  ❌ Rejected            │
 └─────────────────────────────────────────────┘
 ```
 
