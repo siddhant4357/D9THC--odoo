@@ -244,31 +244,35 @@ const ExpenseManagement = () => {
         </button>
       </div>
 
-      {/* Expenses Table */}
+      {/* Expenses Table - Responsive */}
       <div className="bg-white rounded-xl shadow-xl border border-purple-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
-          <h2 className="text-xl font-bold text-gray-900">All Expenses</h2>
+        <div className="p-4 md:p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
+          <h2 className="text-lg md:text-xl font-bold text-gray-900">All Expenses</h2>
+          <p className="text-xs text-gray-500 mt-1 md:hidden">Scroll right to see all columns →</p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
+          <table className="w-full min-w-[800px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employee</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Paid By</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Employee</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Description</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Date</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Category</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Paid By</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Amount</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status</th>
+                <th className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {expenses.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
-                    No expenses yet. Click "Scan Receipt" or "Create Manual Expense" to get started!
+                  <td colSpan="8" className="px-4 md:px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center space-y-2">
+                      <FiFile size={48} className="text-gray-300" />
+                      <p>No expenses yet. Click "Scan Receipt" or "Create Manual Expense" to get started!</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -278,31 +282,53 @@ const ExpenseManagement = () => {
                     className="hover:bg-purple-50 transition cursor-pointer"
                     onClick={() => navigate(`/admin/expenses/${expense._id}`)}
                   >
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{expense.employee?.name}</div>
+                    <td className="px-3 md:px-6 py-4">
+                      <div className="font-medium text-gray-900 text-sm md:text-base">{expense.employee?.name}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-gray-900">{expense.description}</div>
+                    <td className="px-3 md:px-6 py-4">
+                      <div className="text-gray-900 text-sm md:text-base">{expense.description}</div>
                       {expense.remarks && (
-                        <div className="text-sm text-gray-500">{expense.remarks}</div>
+                        <div className="text-xs md:text-sm text-gray-500">{expense.remarks}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-gray-700">{formatDate(expense.date)}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 md:px-6 py-4 text-gray-700 text-sm md:text-base whitespace-nowrap">{formatDate(expense.date)}</td>
+                    <td className="px-3 md:px-6 py-4">
                       <span className="px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full">
                         {expense.category}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-700 capitalize">{expense.paidBy}</td>
-                    <td className="px-6 py-4 font-semibold text-gray-900">
-                      {formatCurrency(expense.amount)}
+                    <td className="px-3 md:px-6 py-4 capitalize text-sm md:text-base">{expense.paidBy}</td>
+                    <td className="px-3 md:px-6 py-4 font-semibold text-gray-900">
+                      <div className="space-y-1">
+                        {/* Original Amount */}
+                        <p className="font-semibold text-gray-900 text-sm md:text-base whitespace-nowrap">
+                          {expense.amount} {expense.currency}
+                        </p>
+                        
+                        {/* Converted Amount (if different currency) */}
+                        {expense.convertedAmount && expense.currency !== user?.company?.currency?.code && (
+                          <div className="flex items-center space-x-2">
+                            <div className="h-px w-2 md:w-4 bg-gray-300"></div>
+                            <p className="text-xs md:text-sm text-purple-600 font-medium whitespace-nowrap">
+                              ≈ {formatCurrency(expense.convertedAmount)}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {/* Company Currency Label */}
+                        {expense.convertedAmount && expense.currency !== user?.company?.currency?.code && (
+                          <p className="text-xs text-gray-500 whitespace-nowrap">
+                            to {user?.company?.currency?.code}
+                          </p>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 text-sm border rounded-full capitalize font-medium ${getStatusColor(expense.status)}`}>
+                    <td className="px-3 md:px-6 py-4">
+                      <span className={`px-2 md:px-3 py-1 text-xs md:text-sm border rounded-full capitalize font-medium ${getStatusColor(expense.status)}`}>
                         {expense.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-3 md:px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center space-x-2">
                         {expense.status === 'draft' && (
                           <>

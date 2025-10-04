@@ -18,7 +18,7 @@ const SignIn = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/admin');  // Go to role-specific dashboard
     }
   }, [isAuthenticated, navigate]);
 
@@ -47,7 +47,7 @@ const SignIn = () => {
     setLoading(false);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/admin');  // Go to role-specific dashboard instead of old dashboard
     } else {
       setError(result.message);
     }

@@ -68,15 +68,16 @@ const ManagerDashboard = () => {
         return approvalDate >= today;
       }).length;
       
-      // Calculate stats
+      // Use backend-calculated stats or fallback to calculation
+      const backendStats = response.data.stats;
       const pendingAmount = pending.reduce((sum, e) => sum + e.amount, 0);
       
       setTeamStats({
-        pendingCount: pending.length,
-        pendingAmount,
-        approvedToday,
-        rejectedToday,
-        avgApprovalTime: '2.5 hours',
+        pendingCount: backendStats?.pendingCount || pending.length,
+        pendingAmount: backendStats?.pendingAmount || pendingAmount,
+        approvedToday: backendStats?.approvedToday || approvedToday,
+        rejectedToday: backendStats?.rejectedToday || rejectedToday,
+        avgApprovalTime: backendStats?.avgApprovalTime || '2.5 hours',
       });
       
       // Get recent actions (approved/rejected today)
@@ -286,8 +287,19 @@ const ManagerDashboard = () => {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-4">
-                    <p className="font-bold text-xl text-gray-900">{formatCurrency(expense.amount)}</p>
-                    <p className="text-xs text-gray-500 mt-1">{expense.currency}</p>
+                    <div className="space-y-1">
+                      {/* Original Amount */}
+                      <p className="font-bold text-xl text-gray-900">
+                        {expense.amount} {expense.currency}
+                      </p>
+                      
+                      {/* Converted Amount (if different currency) */}
+                      {expense.convertedAmount && expense.currency !== user?.company?.currency?.code && (
+                        <p className="text-sm text-purple-600 font-medium">
+                          ≈ {formatCurrency(expense.convertedAmount)} converted
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

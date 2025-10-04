@@ -21,15 +21,6 @@ const PendingApprovals = () => {
     fetchPendingExpenses();
   }, []);
 
-  useEffect(() => {
-    // Convert currencies for all expenses
-    expenses.forEach(expense => {
-      if (expense.currency !== user?.company?.currency?.code) {
-        convertCurrency(expense._id, expense.amount, expense.currency);
-      }
-    });
-  }, [expenses]);
-
   const fetchPendingExpenses = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -42,6 +33,16 @@ const PendingApprovals = () => {
         expense => expense.status === 'submitted'
       );
       
+      // ✅ NO API CALLS NEEDED - Backend already converted!
+      // Just extract converted amounts
+      const convertedMap = {};
+      pending.forEach(expense => {
+        if (expense.convertedAmount) {
+          convertedMap[expense._id] = expense.convertedAmount.toFixed(2);
+        }
+      });
+      
+      setConvertedAmounts(convertedMap);
       setExpenses(pending);
       setLoading(false);
     } catch (error) {
@@ -51,27 +52,33 @@ const PendingApprovals = () => {
     }
   };
 
-  const convertCurrency = async (expenseId, amount, fromCurrency) => {
-    try {
-      const response = await axios.get(
-        `https://api.exchangerate-api.com/v4/latest/${fromCurrency}`
-      );
-      const rate = response.data.rates[user?.company?.currency?.code];
-      const converted = amount * rate;
-      setConvertedAmounts(prev => ({
-        ...prev,
-        [expenseId]: converted.toFixed(2)
-      }));
-    } catch (error) {
-      console.error('Currency conversion error:', error);
-    }
-  };
-
   const openApprovalModal = (expense, action) => {
     setSelectedExpense(expense);
     setApprovalAction(action);
     setComments('');
     setShowApprovalModal(true);
+  };
+
+  // Urgency indicators based on submission date
+  const getUrgencyColor = (date) => {
+    const daysSince = Math.floor((new Date() - new Date(date)) / (1000 * 60 * 60 * 24));
+    if (daysSince > 7) return 'text-red-600 bg-red-50 border-red-200';
+    if (daysSince > 3) return 'text-orange-600 bg-orange-50 border-orange-200';
+    return 'text-green-600 bg-green-50 border-green-200';
+  };
+
+  const getUrgencyBadge = (date) => {
+    const daysSince = Math.floor((new Date() - new Date(date)) / (1000 * 60 * 60 * 24));
+    if (daysSince > 7) return '🔴 Urgent';
+    if (daysSince > 3) return '🟠 High Priority';
+    return '🟢 Normal';
+  };
+
+  const getDaysAgo = (date) => {
+    const daysSince = Math.floor((new Date() - new Date(date)) / (1000 * 60 * 60 * 24));
+    if (daysSince === 0) return 'Today';
+    if (daysSince === 1) return '1 day ago';
+    return `${daysSince} days ago`;
   };
 
   const handleApproval = async () => {
@@ -83,14 +90,22 @@ const PendingApprovals = () => {
 
     try {
       const token = localStorage.getItem('token');
+      console.log('⏱️ Starting approval request...');
+      const startTime = Date.now();
+      
       await axios.post(
         `http://localhost:5000/api/expenses/${selectedExpense._id}/approve`,
         {
           action: approvalAction,
           comments: comments || (approvalAction === 'approved' ? 'Approved' : 'Rejected'),
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // ⚡ 10 second timeout (prevents hanging)
+        }
       );
+      
+      console.log('✅ Approval completed in:', Date.now() - startTime, 'ms');
 
       // Mark as processed for immediate UI update
       setProcessedExpenses(prev => new Set([...prev, selectedExpense._id]));
@@ -106,7 +121,14 @@ const PendingApprovals = () => {
       }, 1500);
     } catch (error) {
       console.error('Approval error:', error);
-      setError(error.response?.data?.message || 'Failed to process approval');
+      const errorData = error.response?.data;
+      
+      // Show detailed error with current approver info
+      if (errorData?.currentApprover) {
+        setError(`${errorData.message}. Currently waiting for: ${errorData.currentApprover}`);
+      } else {
+        setError(errorData?.message || 'Failed to process approval');
+      }
     } finally {
       setProcessing(false);
     }
@@ -199,6 +221,9 @@ const PendingApprovals = () => {
                     Request Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    Urgency
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Total Amount
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -217,11 +242,11 @@ const PendingApprovals = () => {
                       className={`hover:bg-purple-50 transition ${isProcessed ? 'opacity-50 bg-gray-50' : ''}`}
                     >
                       {/* Approval Subject */}
-                      <td className="px-6 py-4">
+                      <td className="px-3 md:px-6 py-4">
                         <div className="max-w-xs">
-                          <p className="font-semibold text-gray-900 truncate">{expense.description}</p>
+                          <p className="font-semibold text-gray-900 truncate text-sm md:text-base">{expense.description}</p>
                           {expense.remarks && (
-                            <p className="text-sm text-gray-500 truncate">{expense.remarks}</p>
+                            <p className="text-xs md:text-sm text-gray-500 truncate">{expense.remarks}</p>
                           )}
                           <p className="text-xs text-gray-400 mt-1">
                             <FiCalendar className="inline mr-1" size={12} />
@@ -231,7 +256,7 @@ const PendingApprovals = () => {
                       </td>
 
                       {/* Request Owner */}
-                      <td className="px-6 py-4">
+                      <td className="px-3 md:px-6 py-4">
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
                             <span className="text-purple-600 font-semibold text-sm">
@@ -261,6 +286,18 @@ const PendingApprovals = () => {
                         }`}>
                           {isProcessed ? 'Processing...' : 'Pending Approval'}
                         </span>
+                      </td>
+
+                      {/* Urgency Indicator */}
+                      <td className="px-6 py-4">
+                        <div className="space-y-1">
+                          <span className={`inline-block px-2 py-1 text-xs border rounded-full font-medium ${getUrgencyColor(expense.submittedAt || expense.createdAt)}`}>
+                            {getUrgencyBadge(expense.submittedAt || expense.createdAt)}
+                          </span>
+                          <p className="text-xs text-gray-500">
+                            {getDaysAgo(expense.submittedAt || expense.createdAt)}
+                          </p>
+                        </div>
                       </td>
 
                       {/* Total Amount with Currency Conversion */}
@@ -335,67 +372,185 @@ const PendingApprovals = () => {
         </div>
       )}
 
-      {/* Approval Modal */}
+      {/* Approval Modal - Responsive & Beautiful */}
       {showApprovalModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              {approvalAction === 'approved' ? 'Approve Expense' : 'Reject Expense'}
-            </h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-4 rounded-t-2xl z-10">
+              <h3 className="text-xl md:text-2xl font-bold flex items-center">
+                {approvalAction === 'approved' ? (
+                  <>
+                    <FiCheckCircle className="mr-2" size={24} />
+                    Approve Expense
+                  </>
+                ) : (
+                  <>
+                    <FiXCircle className="mr-2" size={24} />
+                    Reject Expense
+                  </>
+                )}
+              </h3>
+            </div>
 
-            {selectedExpense && (
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-600 mb-1">Employee</p>
-                <p className="font-semibold text-gray-900 mb-3">{selectedExpense.employee?.name}</p>
+            {/* Body */}
+            <div className="p-4 md:p-6">
+              {selectedExpense && (
+                <div className="space-y-4 mb-6">
+                {/* Employee */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Employee</p>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-purple-600 font-semibold">
+                        {selectedExpense.employee?.name?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{selectedExpense.employee?.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{selectedExpense.employee?.email}</p>
+                    </div>
+                  </div>
+                </div>
                 
-                <p className="text-sm text-gray-600 mb-1">Amount</p>
-                <p className="font-semibold text-gray-900 mb-3">{formatCurrency(selectedExpense.amount)}</p>
+                {/* Amount - Highlighted */}
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border-2 border-purple-300">
+                  <p className="text-xs text-purple-700 uppercase tracking-wide mb-2 font-semibold">Amount</p>
+                  <div className="space-y-2">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-gray-700">Original:</span>
+                      <p className="font-bold text-gray-900 text-lg">
+                        {selectedExpense.amount} {selectedExpense.currency}
+                      </p>
+                    </div>
+                    {selectedExpense.currency !== user?.company?.currency?.code && convertedAmounts[selectedExpense._id] && (
+                      <div className="flex items-baseline justify-between pt-2 border-t border-purple-300">
+                        <span className="text-sm text-purple-700 font-semibold">Company Currency:</span>
+                        <p className="font-bold text-purple-800 text-xl">
+                          {formatCurrency(convertedAmounts[selectedExpense._id])}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 
-                <p className="text-sm text-gray-600 mb-1">Description</p>
-                <p className="text-gray-900">{selectedExpense.description}</p>
+                {/* Grid for Category & Date */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Category</p>
+                    <span className="inline-block px-3 py-1 text-sm bg-purple-100 text-purple-700 rounded-full font-medium">
+                      {selectedExpense.category}
+                    </span>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Date</p>
+                    <p className="text-gray-900 font-medium flex items-center">
+                      <FiCalendar className="mr-2 text-purple-600" size={16} />
+                      {formatDate(selectedExpense.date)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Description</p>
+                  <p className="text-gray-900 break-words">{selectedExpense.description}</p>
+                  {selectedExpense.remarks && (
+                    <p className="text-sm text-gray-600 mt-2 italic">Note: {selectedExpense.remarks}</p>
+                  )}
+                </div>
+
+                {/* Receipt Display - Beautiful & Responsive */}
+                {selectedExpense.receiptUrl && (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-200">
+                    <p className="text-xs text-blue-700 uppercase tracking-wide mb-3 font-semibold">
+                      📎 Receipt Attachment
+                    </p>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <div className="relative group">
+                        <img 
+                          src={`http://localhost:5000${selectedExpense.receiptUrl}`}
+                          alt="Receipt"
+                          className="w-full h-auto max-h-80 object-contain rounded cursor-pointer transition-transform hover:scale-[1.02]"
+                          onClick={() => window.open(`http://localhost:5000${selectedExpense.receiptUrl}`, '_blank')}
+                        />
+                        {/* Hover Overlay */}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                          <span className="bg-white text-purple-600 px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                            Click to enlarge
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <p className="text-xs text-gray-600 truncate">
+                          {selectedExpense.receiptData?.originalName || 'receipt.jpg'}
+                        </p>
+                        <button
+                          onClick={() => window.open(`http://localhost:5000${selectedExpense.receiptUrl}`, '_blank')}
+                          className="text-xs text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap"
+                        >
+                          View Full Size →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Comments {approvalAction === 'rejected' && <span className="text-red-500">*</span>}
-              </label>
-              <textarea
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                placeholder={
-                  approvalAction === 'approved' 
-                    ? 'Optional: Add comments for approval' 
-                    : 'Required: Please provide reason for rejection'
-                }
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
-              />
-            </div>
+              {/* Comments */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Comments {approvalAction === 'rejected' && <span className="text-red-500">*</span>}
+                </label>
+                <textarea
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder={
+                    approvalAction === 'approved' 
+                      ? 'Optional: Add comments for approval' 
+                      : 'Required: Please provide reason for rejection'
+                  }
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent resize-none"
+                />
+              </div>
 
-            <div className="flex items-center justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowApprovalModal(false);
-                  setSelectedExpense(null);
-                  setComments('');
-                }}
-                disabled={processing}
-                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleApproval}
-                disabled={processing || (approvalAction === 'rejected' && !comments.trim())}
-                className={`px-6 py-2.5 rounded-lg font-semibold text-white transition disabled:opacity-50 disabled:cursor-not-allowed ${
-                  approvalAction === 'approved'
-                    ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-                    : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
-                }`}
-              >
-                {processing ? 'Processing...' : approvalAction === 'approved' ? 'Confirm Approval' : 'Confirm Rejection'}
-              </button>
+              {/* Action Buttons - Mobile Responsive */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                <button
+                  onClick={() => {
+                    setShowApprovalModal(false);
+                    setSelectedExpense(null);
+                    setComments('');
+                  }}
+                  disabled={processing}
+                  className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium order-2 sm:order-1"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApproval}
+                  disabled={processing || (approvalAction === 'rejected' && !comments.trim())}
+                  className={`w-full sm:w-auto px-6 py-3 rounded-lg font-bold text-white transition disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 shadow-lg ${
+                    approvalAction === 'approved'
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200'
+                      : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200'
+                  }`}
+                >
+                  {processing ? (
+                    <span className="flex items-center justify-center">
+                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    `Confirm ${approvalAction === 'approved' ? 'Approval' : 'Rejection'}`
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -42,9 +42,9 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/signup', userData);
-      const { token: newToken, ...user } = response.data;
+      const { token: newToken, user: userData_to_return } = response.data;
       setToken(newToken);
-      setUser(user);
+      setUser(userData_to_return);
       localStorage.setItem('token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       return { success: true };
@@ -59,9 +59,9 @@ export const AuthProvider = ({ children }) => {
   const signin = async (credentials) => {
     try {
       const response = await axios.post('http://localhost:5000/api/auth/signin', credentials);
-      const { token: newToken, ...user } = response.data;
+      const { token: newToken, user: userData } = response.data;
       setToken(newToken);
-      setUser(user);
+      setUser(userData);
       localStorage.setItem('token', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       return { success: true };

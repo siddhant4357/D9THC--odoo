@@ -3,6 +3,7 @@ import {
   getExpenses,
   getExpenseById,
   createExpense,
+  createExpenseWithReceipt,
   uploadReceiptWithOCR,
   updateExpense,
   submitExpense,
@@ -10,7 +11,7 @@ import {
   approveExpense,
 } from '../controllers/expenseController.js';
 import { protect, managerOrAdmin } from '../middleware/auth.js';
-import upload from '../middleware/upload.js';
+import upload, { uploadToDisk } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -22,6 +23,9 @@ router.get('/', getExpenses);
 
 // Create expense (manual)
 router.post('/', createExpense);
+
+// ✅ NEW: Create expense with receipt attachment (saved to disk)
+router.post('/with-receipt', uploadToDisk.single('receipt'), createExpenseWithReceipt);
 
 // Upload receipt with OCR
 router.post('/ocr-upload', upload.single('receipt'), uploadReceiptWithOCR);

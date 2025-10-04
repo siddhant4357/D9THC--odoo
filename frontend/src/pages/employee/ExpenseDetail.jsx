@@ -13,6 +13,7 @@ import {
   FiX
 } from 'react-icons/fi';
 import axios from 'axios';
+import ApprovalTimeline from '../../components/ApprovalTimeline';
 
 const ExpenseDetail = () => {
   const { id } = useParams();
@@ -140,23 +141,53 @@ const ExpenseDetail = () => {
       const token = localStorage.getItem('token');
 
       if (isNewExpense) {
-        // Create new expense
-        const response = await axios.post(
-          'http://localhost:5000/api/expenses',
-          formData,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        // ✅ FIX: Upload receipt file with FormData if present
+        if (receiptFile) {
+          const fileFormData = new FormData();
+          fileFormData.append('receipt', receiptFile);
+          Object.keys(formData).forEach(key => {
+            fileFormData.append(key, formData[key]);
+          });
 
-        if (!isDraft) {
-          // Submit for approval
-          await axios.post(
-            `http://localhost:5000/api/expenses/${response.data.expense._id}/submit`,
-            {},
+          const response = await axios.post(
+            'http://localhost:5000/api/expenses/with-receipt',
+            fileFormData,
+            { 
+              headers: { 
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+              } 
+            }
+          );
+
+          if (!isDraft) {
+            await axios.post(
+              `http://localhost:5000/api/expenses/${response.data.expense._id}/submit`,
+              {},
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setSuccess('Expense with receipt submitted for approval!');
+          } else {
+            setSuccess('Expense with receipt saved as draft!');
+          }
+        } else {
+          // Create expense without receipt
+          const response = await axios.post(
+            'http://localhost:5000/api/expenses',
+            formData,
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          setSuccess('Expense submitted for approval!');
-        } else {
-          setSuccess('Expense saved as draft!');
+
+          if (!isDraft) {
+            await axios.post(
+              `http://localhost:5000/api/expenses/${response.data.expense._id}/submit`,
+              {},
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setSuccess('Expense submitted for approval!');
+          } else {
+            setSuccess('Expense saved as draft!');
+          }
         }
 
         setTimeout(() => {
@@ -560,11 +591,18 @@ const ExpenseDetail = () => {
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <FiClock className="mx-auto mb-3" size={48} />
+              <FiClock className="mx-auto mb-3 text-gray-300" size={48} />
               <p>No approval history yet</p>
               <p className="text-sm mt-1">History will appear once the expense is submitted</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Approval Timeline - Beautiful Visual Timeline */}
+      {!isNewExpense && expense && (expense.submittedAt || (expense.approvalHistory && expense.approvalHistory.length > 0)) && (
+        <div className="mb-6">
+          <ApprovalTimeline expense={expense} />
         </div>
       )}
 

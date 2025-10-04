@@ -337,7 +337,19 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-4">
-                    <p className="font-bold text-gray-900">{formatCurrency(expense.amount)}</p>
+                    <div className="space-y-1">
+                      {/* Original Amount */}
+                      <p className="font-bold text-gray-900">
+                        {expense.amount} {expense.currency}
+                      </p>
+                      
+                      {/* Converted Amount (if different currency) */}
+                      {expense.convertedAmount && expense.currency !== user?.company?.currency?.code && (
+                        <p className="text-sm text-purple-600 font-medium">
+                          ≈ {formatCurrency(expense.convertedAmount)}
+                        </p>
+                      )}
+                    </div>
                     <span className={`inline-block mt-1 px-2 py-0.5 text-xs border rounded-full capitalize font-medium ${getStatusColor(expense.status)}`}>
                       {expense.status}
                     </span>

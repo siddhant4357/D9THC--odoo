@@ -6,9 +6,19 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import approvalRuleRoutes from './routes/approvalRuleRoutes.js';
 import expenseRoutes from './routes/expenseRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
+import { initializeGemini } from './services/aiInsightsService.js';
 
 // Load env variables
 dotenv.config();
+
+// Initialize Gemini AI if API key is available
+if (process.env.GEMINI_API_KEY) {
+  initializeGemini(process.env.GEMINI_API_KEY);
+  console.log('🤖 Gemini AI integration enabled!');
+} else {
+  console.log('ℹ️  Running without Gemini AI (basic insights only)');
+}
 
 // Connect to database
 connectDB();
@@ -25,6 +35,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/approval-rules', approvalRuleRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Health check
 app.get('/', (req, res) => {

@@ -10,6 +10,7 @@ import ApprovalRules from './pages/admin/ApprovalRules';
 import ExpenseManagement from './pages/employee/ExpenseManagement';
 import ExpenseDetail from './pages/employee/ExpenseDetail';
 import PendingApprovals from './pages/manager/PendingApprovals';
+import Analytics from './pages/Analytics';
 import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
@@ -20,14 +21,8 @@ const App = () => {
           <Route path="/" element={<Navigate to="/signin" />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
+          {/* Redirect old dashboard to admin panel */}
+          <Route path="/dashboard" element={<Navigate to="/admin" />} />
           <Route
             path="/admin"
             element={
@@ -41,6 +36,7 @@ const App = () => {
             <Route path="expenses/new" element={<ExpenseDetail />} />
             <Route path="expenses/:id" element={<ExpenseDetail />} />
             <Route path="approvals" element={<PendingApprovals />} />
+            <Route path="analytics" element={<Analytics />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="approval-rules" element={<ApprovalRules />} />
           </Route>

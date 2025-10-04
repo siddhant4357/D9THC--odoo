@@ -14,15 +14,23 @@ const RoleDashboard = () => {
     return <Navigate to="/signin" />;
   }
 
+  // Debug: Log user object to see structure
+  console.log('RoleDashboard - User object:', user);
+  console.log('RoleDashboard - User role:', user.role);
+
   // Show role-specific dashboard
   switch (user.role) {
     case 'admin':
+      console.log('Loading Admin Dashboard');
       return <AdminDashboard />;
     case 'manager':
+      console.log('Loading Manager Dashboard');
       return <ManagerDashboard />;
     case 'employee':
+      console.log('Loading Employee Dashboard');
       return <EmployeeDashboard />;
     default:
+      console.log('Defaulting to Employee Dashboard');
       return <EmployeeDashboard />;
   }
 };
