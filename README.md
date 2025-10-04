@@ -213,7 +213,7 @@ Manager sees: €500 EUR = $545.50 USD (company currency)
 ```bash
 # Clone repository
 git clone <repository-url>
-cd expense-management-system
+cd your-expense-management-repo
 
 # Install backend dependencies
 cd Backend
@@ -236,7 +236,7 @@ sudo systemctl start mongod  # Linux/Mac
 
 *Option B - MongoDB Atlas (Recommended):*
 - Create free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-- Get connection string (format: `mongodb+srv://user:pass@cluster.mongodb.net/`)
+- Get connection string (format: `mongodb+srv://<username>:<password>@cluster.mongodb.net/`)
 
 **2. Backend Environment Variables**
 
@@ -248,7 +248,7 @@ NODE_ENV=development
 
 # Database
 MONGODB_URI=mongodb://localhost:27017/expense-management
-# OR for Atlas: mongodb+srv://username:password@cluster.mongodb.net/expense-management
+# OR for Atlas: mongodb+srv://<username>:<password>@cluster.mongodb.net/expense-management
 
 # JWT Secret
 JWT_SECRET=your_super_secure_random_string_change_in_production
@@ -334,7 +334,7 @@ POST   /api/approval-rules       # Create/update rule
 POST /api/expenses
 {
   "description": "Client dinner",
-  "date": "2024-10-04",
+  "date": "2025-01-20",
   "category": "Food",
   "paidBy": "John Doe",
   "amount": 5000,
@@ -540,7 +540,7 @@ expense-management-system/
 This project is licensed under the **MIT License**.
 
 ```
-Copyright (c) 2024 Expense Management System
+Copyright (c) 2025 Expense Management System
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -567,7 +567,7 @@ copies of the Software...
 ## 📞 Contact & Support
 
 **For Issues:**
-- GitHub Issues: [Create Issue](https://github.com/yourusername/expense-management-system/issues)
+- GitHub Issues: [Create Issue](https://github.com/d9thc/expense-management-system/issues)
 - Email: support@yourcompany.com
 
 **For Questions:**
@@ -578,7 +578,7 @@ copies of the Software...
 
 <div align="center">
 
-### 🎯 Built for Odoo Hackathon 2024
+### 🎯 Built for Odoo Hackathon 2025
 
 **Solving real-world expense management challenges with modern technology.**
 
@@ -586,7 +586,7 @@ copies of the Software...
 
 ---
 
-Made with ❤️ by [Your Team Name]
+Made with ❤️ by Team D9THC
 
 </div>
 
