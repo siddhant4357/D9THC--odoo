@@ -230,7 +230,7 @@ const ExpenseManagement = () => {
           ) : (
             <>
               <FiCamera size={20} />
-              <span>Scan Receipt (OCR)</span>
+              <span>Scan Receipt</span>
             </>
           )}
         </button>
@@ -374,7 +374,7 @@ const ExpenseManagement = () => {
       <div className="mt-8 bg-purple-50 border border-purple-200 rounded-xl p-6">
         <h3 className="font-semibold text-purple-900 mb-2">💡 How to submit expenses:</h3>
         <ul className="text-sm text-purple-800 space-y-2">
-          <li>• <strong>Scan Receipt:</strong> Take a photo or upload image - OCR will auto-extract amount, date, and category</li>
+          <li>• <strong>Scan Receipt:</strong> Take a photo or upload image - auto-extract amount, date, and category</li>
           <li>• <strong>Manual Entry:</strong> Create expense manually if you don't have a receipt</li>
           <li>• <strong>Draft:</strong> Edit and perfect your expense before submitting</li>
           <li>• <strong>Submit:</strong> Send for approval once ready</li>

@@ -92,6 +92,8 @@ Companies struggle with manual expense reimbursement processes that are:
 - 💾 **Draft Saving** - Save incomplete expenses before submission
 - 📊 **Status Tracking** - Visual workflow (Draft → Pending → Approved/Rejected)
 
+![Employee Expense Management](docs/images/employee-expense-page.png)
+
 **Manager Features:**
 - ✅ **Approval Queue** - View expenses awaiting approval with urgency indicators
 - 💬 **Comments & Feedback** - Add notes when approving/rejecting
@@ -139,6 +141,8 @@ Companies struggle with manual expense reimbursement processes that are:
    ```
    Employee → Manager → [Finance, HR, Legal] (60%) → Approved
    ```
+
+![Approval Workflow Diagram](docs/images/workflow-diagram.png)
 
 #### Workflow Configuration:
 - ✅ **Manager-First Option** - Route to assigned manager before other approvers
@@ -208,6 +212,28 @@ Manager sees: €500 EUR = $545.50 USD (company currency)
 - **PDF Export:** Generate monthly expense reports
 - **AI-Powered Insights:** Fraud detection and spending analysis
 - **Interactive Charts:** Line, pie, and bar charts with time filters
+
+![Admin Dashboard](docs/images/admin-dashboard.png)
+
+#### 👥 User Management
+Create and manage users with role assignments, manager relationships, and auto-generated passwords.
+
+![User Management](docs/images/user-management.png)
+
+#### 📊 Analytics Dashboard
+Interactive charts with time period filters showing spending trends, category breakdowns, and status distribution.
+
+![Analytics Dashboard](docs/images/analytics-dashboard.png)
+
+#### 🤖 AI-Powered Insights
+Smart insights with fraud detection, spending analysis, and personalized budget recommendations powered by Google Gemini AI.
+
+![AI Insights](docs/images/ai-insights.png)
+
+#### ⚙️ Approval Rules Configuration
+Configure complex multi-level approval workflows with sequential, parallel, and percentage-based approvals.
+
+![Approval Rules](docs/images/approval-rules.png)
 
 ### 🤖 AI-Powered Smart Insights
 
@@ -353,65 +379,36 @@ npm install
 
 ### Configuration
 
-**1. MongoDB Setup**
-
-*Option A - Local:*
+**1. Start MongoDB**
 ```bash
 net start MongoDB  # Windows
 sudo systemctl start mongod  # Linux/Mac
 ```
+Or use [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) (free cloud database)
 
-*Option B - MongoDB Atlas (Recommended):*
-- Create free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-- Get connection string (format: `mongodb+srv://<username>:<password>@cluster.mongodb.net/`)
-
-**2. Backend Environment Variables**
-
-Create `Backend/.env`:
+**2. Create `Backend/.env`**
 ```env
-# Server
 PORT=5000
-NODE_ENV=development
-
-# Database
 MONGODB_URI=mongodb://localhost:27017/expense-management
-# OR for Atlas: mongodb+srv://<username>:<password>@cluster.mongodb.net/expense-management
+JWT_SECRET=your_super_secure_random_string
 
-# JWT Secret
-JWT_SECRET=your_super_secure_random_string_change_in_production
-
-# Email (Gmail)
+# Email (Gmail with App Password)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-16-digit-app-password
 
-# OCR API (Free 25K requests/month)
-OCR_SPACE_API_KEY=your_ocr_space_api_key
+# API Keys (All Free)
+OCR_SPACE_API_KEY=get_from_ocr.space
+GEMINI_API_KEY=get_from_makersuite.google.com
 
-# Google Gemini AI (Free)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# CORS
 CORS_ORIGIN=http://localhost:5173
 ```
 
-**Gmail App Password Setup:**
-1. Enable [2-Step Verification](https://myaccount.google.com/security)
-2. Create [App Password](https://myaccount.google.com/apppasswords)
-3. Use 16-character password in `EMAIL_PASS`
-
-**OCR.space API Key (Free - Recommended):**
-1. Register at [OCR.space](https://ocr.space/ocrapi)
-2. Get free API key (25,000 requests/month)
-3. Add to `OCR_SPACE_API_KEY`
-
-**Google Gemini API Key (Free - For AI Insights):**
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with Google account
-3. Create API key (free tier available)
-4. Add to `GEMINI_API_KEY`
-5. Model used: `gemini-2.0-flash-exp` (optimized for free tier)
+**Get API Keys:**
+- **Gmail App Password:** [2-Step Verification](https://myaccount.google.com/security) → [App Password](https://myaccount.google.com/apppasswords)
+- **OCR.space:** [Free 25K/month](https://ocr.space/ocrapi)
+- **Gemini AI:** [Free tier](https://makersuite.google.com/app/apikey)
 
 ### Run Application
 
@@ -433,70 +430,13 @@ npm run dev
 
 ## 📡 API Endpoints
 
-### Authentication
-```http
-POST   /api/auth/signup          # Register user & create company
-POST   /api/auth/signin          # Login user
-GET    /api/auth/me              # Get current user (requires token)
-```
+**Base URL:** `http://localhost:5000/api`
 
-### User Management (Admin Only)
-```http
-GET    /api/users                # Get all users
-POST   /api/users/create-send-password   # Create user & email password
-PUT    /api/users/:id            # Update user
-DELETE /api/users/:id            # Delete user
-```
-
-### Expenses
-```http
-GET    /api/expenses             # Get expenses (filtered by role)
-POST   /api/expenses             # Create expense manually
-POST   /api/expenses/scan-receipt  # Upload receipt for OCR
-GET    /api/expenses/:id         # Get expense by ID
-PUT    /api/expenses/:id         # Update expense (draft only)
-DELETE /api/expenses/:id         # Delete expense
-POST   /api/expenses/:id/approve # Approve/reject expense
-```
-
-### Approval Rules (Admin Only)
-```http
-GET    /api/approval-rules       # Get all rules
-GET    /api/approval-rules/:userId  # Get rule for user
-POST   /api/approval-rules       # Create/update rule
-DELETE /api/approval-rules/:id   # Delete rule
-```
-
-### Analytics & Reports
-```http
-GET    /api/analytics/data       # Get analytics data with charts
-GET    /api/analytics/insights   # Get AI-powered smart insights
-GET    /api/analytics/recommendations  # Get AI budget recommendations
-GET    /api/analytics/report/pdf  # Generate PDF report (admin)
-GET    /api/analytics/report/employee  # Generate employee PDF report
-```
-
-**Example - Create Expense:**
-```json
-POST /api/expenses
-{
-  "description": "Client dinner",
-  "date": "2025-01-20",
-  "category": "Food",
-  "paidBy": "John Doe",
-  "amount": 5000,
-  "currency": "INR",
-  "remarks": "Meeting with potential client"
-}
-```
-
-**Example - OCR Receipt Scan:**
-```http
-POST /api/expenses/scan-receipt
-Content-Type: multipart/form-data
-
-receipt: [binary image file]
-```
+- **Auth:** `/auth/signup`, `/auth/signin`, `/auth/me`
+- **Users:** `/users` (CRUD operations - Admin only)
+- **Expenses:** `/expenses` (CRUD + `/scan-receipt`, `/:id/approve`)
+- **Approval Rules:** `/approval-rules` (Admin only)
+- **Analytics:** `/analytics/data`, `/analytics/insights`, `/analytics/report/pdf`
 
 ---
 
@@ -520,86 +460,13 @@ receipt: [binary image file]
 
 ---
 
-## 🧪 Testing Guide
+## 🧪 Quick Testing
 
-### Test Accounts Setup
-
-**1. Create Admin (First Signup):**
-```
-Name: Admin User
-Email: admin@company.com
-Password: Admin123!
-Country: United States (USD)
-```
-
-**2. Create Manager (Admin creates):**
-- Login as admin → User Management
-- Create user with role "Manager"
-- System emails password to manager
-
-**3. Create Employee (Admin creates):**
-- Create user with role "Employee"
-- Assign to manager
-- Employee receives password email
-
-### Test Scenarios
-
-**Scenario 1: Employee Expense Creation**
-1. Login as employee
-2. Click "Scan Receipt (OCR)"
-3. Upload sample receipt (restaurant bill)
-4. Verify auto-filled: amount, date, merchant, category
-5. Add remarks → Submit
-6. Check dashboard: Status = "Pending Approval" (yellow)
-
-**Scenario 2: Manager Approval**
-1. Login as manager
-2. See "5 Expenses Need Your Approval" banner
-3. Click "Pending Approvals"
-4. Review expense details
-5. Verify currency conversion (original → company currency)
-6. Click "Approve" → Add comment → Confirm
-7. Verify expense disappears from pending list
-
-**Scenario 3: Multi-Currency Flow**
-1. Company currency: USD
-2. Employee submits expense: €500 EUR
-3. System converts: €500 = $545.50 USD
-4. Manager sees both: "€500 EUR ($545.50 USD)"
-5. Approval recorded in company currency
-
-**Scenario 4: Complex Approval Workflow**
-1. Admin configures: Manager → [Finance, HR] (60%)
-2. Employee submits expense
-3. Goes to manager first (manager-first enabled)
-4. Manager approves → Goes to Finance + HR
-5. Finance approves (50% reached, not enough)
-6. HR approves (100% reached) → Expense approved
-
-**Scenario 5: Urgency Indicators**
-1. Create expense 8 days ago (backdated)
-2. Login as manager
-3. See 🔴 "Urgent" badge on expense
-4. Expenses 3-7 days old: 🟠 "High Priority"
-5. Recent expenses: 🟢 "Normal"
-
-**Scenario 6: AI Insights & PDF Reports**
-1. Login as admin
-2. Navigate to Analytics page
-3. View AI-powered insights (fraud detection, spending trends)
-4. Click "Show AI Recommendations"
-5. Review personalized budget optimization tips
-6. Select time period (Last Month / 3 Months / 6 Months / 1 Year)
-7. View interactive charts (Line, Pie, Bar)
-8. Click "Export PDF" for professional report
-9. Open generated PDF with charts and summaries
-
-**Scenario 7: Real-Time Approval Updates**
-1. Employee submits expense
-2. Manager dashboard instantly shows new pending approval
-3. Manager approves with comment
-4. Employee dashboard immediately updates to "Approved"
-5. Status changes reflected without page refresh
+**1. First Signup:** Admin account auto-creates company  
+**2. Admin creates:** Managers and Employees via User Management  
+**3. Test Flow:** Employee submits → Manager approves → Status updates  
+**4. Try OCR:** Upload receipt → Auto-fills form → Submit  
+**5. View Analytics:** Check charts, AI insights, and export PDF
 
 ---
 
@@ -625,86 +492,17 @@ Country: United States (USD)
 
 ---
 
-## 🛠️ Development
 
-### Project Structure (Simplified)
-```
-expense-management-system/
-├── Backend/
-│   ├── config/          # Database connection
-│   ├── controllers/     # Business logic
-│   ├── middleware/      # Auth & validation
-│   ├── models/          # MongoDB schemas
-│   ├── routes/          # API routes
-│   ├── services/        # Email, OCR services
-│   └── server.js        # Entry point
-│
-├── frontend/
-│   └── src/
-│       ├── components/  # Layout, PrivateRoute
-│       ├── context/     # AuthContext
-│       ├── pages/       # All pages
-│       └── App.jsx      # Main app
-│
-└── README.md
-```
-
-### Adding New Features
-1. **Backend:** Add route → controller → service
-2. **Frontend:** Create page → add route → update navigation
-3. **Test:** Verify with Postman + browser
-4. **Deploy:** Push to repository
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-**❌ "MongoDB connection failed"**
-- Ensure MongoDB is running: `net start MongoDB`
-- Check `MONGODB_URI` in `.env`
-- For Atlas: Verify IP whitelist (0.0.0.0/0 for dev)
-
-**❌ "Email failed to send"**
-- Verify Gmail App Password (not regular password)
-- Enable 2-Step Verification in Google Account
-- Check `EMAIL_USER` and `EMAIL_PASS` in `.env`
-
-**❌ "OCR not extracting text"**
-- Free API key has 10 requests/day limit
-- Register at OCR.space for 25,000/month free
-- Ensure image is clear and readable
-
-**❌ "JWT token invalid"**
-- Token expires after session timeout
-- Login again to get new token
-- Check `JWT_SECRET` is set in `.env`
-
-**❌ "Cannot upload receipt"**
-- File size limit: 10MB
-- Supported formats: JPG, PNG, PDF, BMP
-- Check `Backend/uploads/` directory exists with write permissions
-- On Windows: `mkdir Backend\uploads`
-- On Linux/Mac: `mkdir -p Backend/uploads`
-
-**❌ "AI insights not working"**
-- Verify `GEMINI_API_KEY` in `.env` file
-- Test your API key at [Google AI Studio](https://makersuite.google.com/)
-- Model used: `gemini-2.0-flash-exp`
-- Check backend console for Gemini initialization message
-
-**❌ "PDF generation failed"**
-- Ensure `Backend/uploads/` directory exists
-- Check expenses have all required fields
-- Verify PDFKit is installed: `npm list pdfkit`
-- Check backend logs for specific error
-
-**❌ "Currency conversion taking too long"**
-- System uses cached exchange rates (refreshes every hour)
-- First conversion may take 2-3 seconds
-- Subsequent conversions are instant
-- Check internet connection for API access
+**MongoDB issues:** Ensure MongoDB is running (`net start MongoDB`) and check `.env` connection string  
+**Email not sending:** Use Gmail App Password (not regular password) with 2-Step Verification enabled  
+**OCR not working:** Get free API key from [OCR.space](https://ocr.space/ocrapi) (25K requests/month)  
+**Upload errors:** Create `Backend/uploads/` directory if missing  
+**AI insights:** Verify `GEMINI_API_KEY` in `.env` from [Google AI Studio](https://makersuite.google.com/)
 
 ---
 

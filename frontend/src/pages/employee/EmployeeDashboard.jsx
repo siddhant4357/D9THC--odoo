@@ -159,7 +159,7 @@ const EmployeeDashboard = () => {
               <FiCamera size={24} />
             </div>
             <div className="text-left">
-              <p className="font-semibold text-lg">Scan Receipt (OCR)</p>
+              <p className="font-semibold text-lg">Scan Receipt</p>
               <p className="text-indigo-100 text-sm">Auto-extract data</p>
             </div>
           </div>

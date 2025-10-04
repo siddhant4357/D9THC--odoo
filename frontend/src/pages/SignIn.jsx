@@ -64,8 +64,35 @@ const SignIn = () => {
         {/* Logo and Header */}
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl font-bold">EM</span>
+            <div className="w-20 h-20">
+              <svg viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-2xl">
+                <circle cx="96" cy="96" r="96" fill="url(#grad1-signin)"/>
+                <defs>
+                  <linearGradient id="grad1-signin" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:'#9333ea', stopOpacity:1}} />
+                    <stop offset="100%" style={{stopColor:'#6b21a8', stopOpacity:1}} />
+                  </linearGradient>
+                  <linearGradient id="grad2-signin" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style={{stopColor:'#ffffff', stopOpacity:0.95}} />
+                    <stop offset="100%" style={{stopColor:'#f3e8ff', stopOpacity:0.95}} />
+                  </linearGradient>
+                </defs>
+                <g transform="translate(96, 96)">
+                  <rect x="-32" y="-42" width="64" height="84" rx="6" fill="url(#grad2-signin)" stroke="#ffffff" strokeWidth="2"/>
+                  <rect x="-26" y="-36" width="52" height="4" rx="2" fill="#9333ea"/>
+                  <rect x="-26" y="-24" width="38" height="2" rx="1" fill="#9333ea" opacity="0.7"/>
+                  <rect x="-26" y="-16" width="42" height="2" rx="1" fill="#9333ea" opacity="0.7"/>
+                  <rect x="-26" y="-8" width="35" height="2" rx="1" fill="#9333ea" opacity="0.7"/>
+                  <rect x="-26" y="0" width="40" height="2" rx="1" fill="#9333ea" opacity="0.7"/>
+                  <line x1="-26" y1="10" x2="26" y2="10" stroke="#9333ea" strokeWidth="1.5" strokeDasharray="2,2" opacity="0.5"/>
+                  <rect x="-26" y="18" width="52" height="3" rx="1.5" fill="#9333ea"/>
+                  <rect x="-26" y="26" width="52" height="4" rx="2" fill="#9333ea"/>
+                  <circle cx="20" cy="-28" r="14" fill="#10b981" stroke="#ffffff" strokeWidth="2"/>
+                  <text x="20" y="-21" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="bold" fill="#ffffff" textAnchor="middle">$</text>
+                  <circle cx="-20" cy="32" r="12" fill="#3b82f6" stroke="#ffffff" strokeWidth="2"/>
+                  <path d="M -25 32 L -20 37 L -14 27" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </g>
+              </svg>
             </div>
           </div>
           <h2 className="text-4xl font-bold text-gray-900 mb-2">Welcome Back</h2>
