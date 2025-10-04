@@ -1,0 +1,92 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Environment Variables (IMPORTANT - Contains secrets!)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+config.js
+
+# Uploaded Files (User data - receipts, documents)
+uploads/
+receipts/
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.gif
+*.bmp
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Build & Distribution
+dist/
+build/
+.cache/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Database Files (if using local DB files)
+*.db
+*.sqlite
+*.sqlite3
+
+# ML Model Files (if storing locally)
+weights/
+models/
+*.pth
+*.pt
+*.h5
+*.pkl
+*.onnx
+eng.traineddata
+
+# Miscellaneous
+.npm
+.eslintcache
+.node_repl_history
+.yarn-integrity
+.parcel-cache
+
