@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
+import ChangePassword from './pages/ChangePassword';
 import Dashboard from './pages/Dashboard';
 import UserManagement from './pages/UserManagement';
 import AdminLayout from './components/AdminLayout';
@@ -21,6 +22,7 @@ const App = () => {
           <Route path="/" element={<Navigate to="/signin" />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
+          <Route path="/change-password" element={<PrivateRoute><ChangePassword isFirstLogin={true} /></PrivateRoute>} />
           {/* Redirect old dashboard to admin panel */}
           <Route path="/dashboard" element={<Navigate to="/admin" />} />
           <Route

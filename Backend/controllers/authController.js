@@ -43,6 +43,7 @@ export const signup = async (req, res) => {
       password,
       role: 'admin',
       company: company._id,
+      firstLogin: false, // Admin chose their own password
     });
 
     // Update company with user reference
@@ -88,6 +89,7 @@ export const signin = async (req, res) => {
         email: user.email,
         role: user.role,
         company: user.company,
+        firstLogin: user.firstLogin, // Include firstLogin flag
         token,
       });
     } else {
@@ -112,6 +114,52 @@ export const getMe = async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error('Get me error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// @desc    Change password
+// @route   POST /api/auth/change-password
+// @access  Private
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validation
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Please provide current and new password' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    // Get user with password
+    const user = await User.findById(req.user._id);
+
+    // Check current password
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    // Check if new password is same as current
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ message: 'New password must be different from current password' });
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.firstLogin = false; // Mark that user has changed password
+    user.passwordChangedAt = new Date();
+    await user.save();
+
+    res.json({ 
+      message: 'Password changed successfully',
+      firstLogin: false 
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

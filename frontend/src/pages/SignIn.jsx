@@ -47,7 +47,12 @@ const SignIn = () => {
     setLoading(false);
 
     if (result.success) {
-      navigate('/admin');  // Go to role-specific dashboard instead of old dashboard
+      // Check if user needs to change password (first login)
+      if (result.user && result.user.firstLogin) {
+        navigate('/change-password');
+      } else {
+        navigate('/admin');  // Go to role-specific dashboard
+      }
     } else {
       setError(result.message);
     }

@@ -93,12 +93,13 @@ export const sendPasswordEmail = async (email, name, password, isNewUser = true)
             .button {
               display: inline-block;
               background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-              color: white;
+              color: #ffffff !important;
               padding: 12px 30px;
               text-decoration: none;
               border-radius: 8px;
               margin: 20px 0;
               font-weight: bold;
+              font-size: 16px;
             }
             .footer {
               background: #f9fafb;
@@ -140,7 +141,9 @@ export const sendPasswordEmail = async (email, name, password, isNewUser = true)
             </div>
             
             <div style="text-align: center;">
-              <a href="http://localhost:5173/signin" class="button">Log In Now</a>
+              <a href="http://localhost:5173/signin" class="button" style="display: inline-block; background-color: #7c3aed; background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); color: #ffffff !important; padding: 14px 32px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px rgba(124, 58, 237, 0.3);">
+                <span style="color: #ffffff !important;">🔐 Log In Now</span>
+              </a>
             </div>
             
             <div class="warning">
